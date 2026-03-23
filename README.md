@@ -1,34 +1,43 @@
 # mcp-mariadb-demo
 
-Minimal learning repo for running a Python MCP server backed by MariaDB.
+Minimal learning repo for a Python MCP server backed by MariaDB.
 
-## What You Get
+This repo keeps one supported implementation:
 
-- A simple MCP server with 3 tools:
-  - `ping_database`
-  - `list_tables`
-  - `run_readonly_query`
-- Local MariaDB via Docker Compose
-- External MariaDB configuration path
-- Example MCP server config in `mcp.json`
+- server: `src/server.py`
+- seed SQL: `db/init/`
+- client template: `mcp.json`
+- config guide: `CONFIG.md`
 
-## Prerequisites
+The demo exposes three tools:
 
-- Python 3.10+ (use `python3.10` or `python3.11`, not macOS system Python 3.9)
-- Docker + Docker Compose (for local DB mode)
+- `ping_database`
+- `list_tables`
+- `run_readonly_query`
 
-## Initialise MariaDB
+## Scope
 
-```SQL
-CREATE DATABASE mcp_demo;
-CREATE USER 'mcp_user'@'localhost' IDENTIFIED BY 'StrongLocalPassword123!';
-GRANT ALL PRIVILEGES ON mcp_demo.* TO 'mcp_user'@'localhost';
-FLUSH PRIVILEGES;
-```
+This repo is meant to teach:
 
-## Quickstart (Local Docker DB)
+- how a small MCP server is structured
+- how to load MariaDB connection settings from `.env`
+- how an MCP client connects over stdio
+- how to keep a simple query tool read-only
 
-1. Create and activate a virtual environment:
+It does not try to cover packaging, auth, vector search, or production deployment.
+
+## Demo Data
+
+The seed SQL creates a small IT/helpdesk dataset with:
+
+- `users`
+- `assets`
+- `tickets`
+- `knowledge_articles`
+
+## Quickstart
+
+1. Create a virtual environment and install dependencies.
 
 ```bash
 python3.11 -m venv .venv
@@ -37,74 +46,62 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-2. Start MariaDB locally:
-
-```bash
-docker compose up -d
-```
-
-3. Copy env template:
+2. Create `.env` from the template and point it at your MariaDB instance.
 
 ```bash
 cp .env.example .env
 ```
 
-4. Run the MCP server:
+3. Load the demo schema and data.
+
+```bash
+mariadb -h <host> -P <port> -u <user> -p <database> < db/init/001_schema.sql
+mariadb -h <host> -P <port> -u <user> -p <database> < db/init/002_data.sql
+```
+
+4. Run the server.
 
 ```bash
 python src/server.py
 ```
 
-## External MariaDB Mode
+If it appears idle, that is normal. In stdio mode it is waiting for an MCP client.
 
-Set environment variables for your remote or existing MariaDB instance:
+## Verify The Database
+
+Connect directly and check the seeded tables:
 
 ```bash
-export MARIADB_HOST="your-db-host"
-export MARIADB_PORT="3306"
-export MARIADB_USER="your-user"
-export MARIADB_PASSWORD="your-password"
-export MARIADB_DATABASE="your-database"
-export MARIADB_SSL_DISABLED="false"
-python src/server.py
+mariadb -h <host> -P <port> -u <user> -p <database>
 ```
 
-If your environment requires TLS CA/certs, update `src/server.py` to pass full SSL options to PyMySQL.
-
-## Tool Behavior
-
-- `ping_database`: validates DB connection and returns server version.
-- `list_tables(schema=None)`: lists tables in configured DB/schema.
-- `run_readonly_query(sql, limit=50)`: only allows read-only SQL prefixes (`SELECT`, `SHOW`, `DESCRIBE`, `EXPLAIN`).
+```sql
+SHOW TABLES;
+SELECT ticket_id, title, priority, status FROM tickets ORDER BY ticket_id;
+```
 
 ## Example Queries
 
-Use your MCP client to invoke:
-
-- `ping_database`
-- `list_tables`
-- `run_readonly_query` with:
+Use your MCP client to call `run_readonly_query` with:
 
 ```sql
-SELECT id, name, email, tier FROM customers ORDER BY id;
+SELECT ticket_id, title, priority, status
+FROM tickets
+ORDER BY ticket_id;
 ```
 
-## MCP Client Configuration
-
-Use `mcp.json` as a template. Point your MCP-capable client to this server command:
-
-- command: `python`
-- args: `src/server.py`
-- cwd: project root
-
-## Troubleshooting
-
-- Port conflict on `3307`: change host port mapping in `docker-compose.yml` and update `MARIADB_PORT`.
-- Access denied: verify username/password and DB grants.
-- Connection timeout: check host firewall/security groups for external DB access.
-- Table not found: local init SQL only runs on first container initialization. To reset:
-
-```bash
-docker compose down -v
-docker compose up -d
+```sql
+SELECT u.full_name, a.asset_tag, a.model
+FROM assets a
+LEFT JOIN users u ON a.assigned_user_id = u.user_id
+ORDER BY a.asset_tag;
 ```
+
+## Notes
+
+- `src/server.py` loads the root `.env` automatically.
+- `run_readonly_query` only allows SQL starting with `SELECT`, `SHOW`, `DESCRIBE`, or `EXPLAIN`.
+- `docker-compose.yml` is still available if you want a disposable local MariaDB, but it is optional.
+- `mariadb-mcp/` is a scratch reference clone and is ignored by git; it is not part of the active demo.
+
+For client setup and troubleshooting, see `CONFIG.md`.

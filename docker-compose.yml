@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     environment:
       MARIADB_ROOT_PASSWORD: root_password
-      MARIADB_DATABASE: demo_mcp
+      MARIADB_DATABASE: mcp_demo
       MARIADB_USER: demo_user
       MARIADB_PASSWORD: demo_password
     ports:

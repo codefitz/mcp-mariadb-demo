@@ -3,15 +3,7 @@
     "mariadb-demo": {
       "command": "python",
       "args": ["src/server.py"],
-      "cwd": ".",
-      "env": {
-        "MARIADB_HOST": "127.0.0.1",
-        "MARIADB_PORT": "3307",
-        "MARIADB_USER": "demo_user",
-        "MARIADB_PASSWORD": "demo_password",
-        "MARIADB_DATABASE": "demo_mcp",
-        "MARIADB_SSL_DISABLED": "true"
-      }
+      "cwd": "."
     }
   }
 }

@@ -25,7 +25,7 @@ def _get_connection() -> pymysql.connections.Connection:
     port = int(_env("MARIADB_PORT", "3307"))
     user = _env("MARIADB_USER", "demo_user")
     password = _env("MARIADB_PASSWORD", "demo_password")
-    database = _env("MARIADB_DATABASE", "demo_mcp")
+    database = _env("MARIADB_DATABASE", "mcp_demo")
     ssl_disabled = _env("MARIADB_SSL_DISABLED", "true").lower() == "true"
 
     ssl: Optional[Dict[str, Any]] = None
@@ -77,7 +77,7 @@ def ping_database() -> Dict[str, Any]:
 @mcp.tool()
 def list_tables(schema: Optional[str] = None) -> List[str]:
     """List tables in the current database (or a provided schema)."""
-    target_schema = schema or _env("MARIADB_DATABASE", "demo_mcp")
+    target_schema = schema or _env("MARIADB_DATABASE", "mcp_demo")
     with _get_connection() as conn:
         with conn.cursor() as cursor:
             cursor.execute(

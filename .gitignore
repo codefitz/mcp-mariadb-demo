@@ -13,3 +13,6 @@ venv/
 # OS/editor
 .DS_Store
 .vscode/
+
+# Local scratch clone kept for reference, not part of the demo
+mariadb-mcp/
