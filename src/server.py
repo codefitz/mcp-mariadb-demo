@@ -1,3 +1,4 @@
+import argparse
 import os
 from typing import Any, Dict, List, Optional, cast
 
@@ -108,5 +109,47 @@ def run_readonly_query(sql: str, limit: int = 50) -> List[Dict[str, Any]]:
     return rows[: min(limit, 200)]
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run the MariaDB demo MCP server over stdio, streamable HTTP, or SSE."
+    )
+    parser.add_argument(
+        "--transport",
+        choices=("stdio", "http", "streamable-http", "sse"),
+        default="stdio",
+        help="Transport to use. Default: stdio. 'http' is accepted as an alias for 'streamable-http'.",
+    )
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Bind host for streamable HTTP or SSE transport. Default: 127.0.0.1.",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8000,
+        help="Bind port for streamable HTTP or SSE transport. Default: 8000.",
+    )
+    parser.add_argument(
+        "--path",
+        default="/mcp",
+        help="Endpoint path for streamable HTTP or SSE transport. Default: /mcp.",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    mcp.run()
+    args = _parse_args()
+    transport = "streamable-http" if args.transport == "http" else args.transport
+
+    if transport == "stdio":
+        mcp.run(transport="stdio")
+    elif transport == "sse":
+        mcp.settings.host = args.host
+        mcp.settings.port = args.port
+        mcp.run(transport="sse", mount_path=args.path)
+    else:
+        mcp.settings.host = args.host
+        mcp.settings.port = args.port
+        mcp.settings.streamable_http_path = args.path
+        mcp.run(transport="streamable-http")
