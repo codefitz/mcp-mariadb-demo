@@ -6,12 +6,34 @@ import pymysql
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
-load_dotenv()
-
 mcp = FastMCP("mariadb-demo")
 
 
 READ_ONLY_PREFIXES = ("select", "show", "describe", "explain")
+_loaded_env_file: Optional[str] = None
+
+
+def _load_runtime_env(env_file: Optional[str] = None) -> None:
+    global _loaded_env_file
+
+    if env_file:
+        if _loaded_env_file == env_file:
+            return
+        load_dotenv(dotenv_path=env_file, override=True)
+        _loaded_env_file = env_file
+        return
+
+    configured_env_file = os.getenv("MARIADB_ENV_FILE") or os.getenv("DOTENV_PATH")
+    if configured_env_file:
+        if _loaded_env_file == configured_env_file:
+            return
+        load_dotenv(dotenv_path=configured_env_file, override=True)
+        _loaded_env_file = configured_env_file
+        return
+
+    if _loaded_env_file is None:
+        load_dotenv()
+        _loaded_env_file = ""
 
 
 def _env(name: str, default: Optional[str] = None) -> str:
@@ -22,6 +44,7 @@ def _env(name: str, default: Optional[str] = None) -> str:
 
 
 def _get_connection() -> pymysql.connections.Connection:
+    _load_runtime_env()
     host = _env("MARIADB_HOST", "127.0.0.1")
     port = int(_env("MARIADB_PORT", "3307"))
     user = _env("MARIADB_USER", "demo_user")
@@ -135,11 +158,17 @@ def _parse_args() -> argparse.Namespace:
         default="/mcp",
         help="Endpoint path for streamable HTTP or SSE transport. Default: /mcp.",
     )
+    parser.add_argument(
+        "--env-file",
+        default=None,
+        help="Optional dotenv file to load instead of the default repo root .env.",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = _parse_args()
+    _load_runtime_env(args.env_file)
     transport = "streamable-http" if args.transport == "http" else args.transport
 
     if transport == "stdio":
