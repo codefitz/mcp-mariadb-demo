@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "mariadbDemo": {
+      "command": "/Volumes/Hub/Code/GitHub/mcp-mariadb-demo/.venv/bin/python",
+      "args": [
+        "/Volumes/Hub/Code/GitHub/mcp-mariadb-demo/src/server.py",
+        "--env-file",
+        "/Volumes/Hub/Code/GitHub/mcp-mariadb-demo/.env.framebuntu"
+      ],
+      "env": {}
+    },
+    "mariadbUcontrol": {
+      "command": "/Volumes/Hub/Code/GitHub/mcp-mariadb-demo/.venv/bin/python",
+      "args": [
+        "/Volumes/Hub/Code/GitHub/mcp-mariadb-demo/src/server.py",
+        "--env-file",
+        "/Volumes/Hub/Code/GitHub/mcp-mariadb-demo/.env"
+      ],
+      "env": {}
+    }
+  }
+}

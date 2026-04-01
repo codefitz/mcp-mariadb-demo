@@ -6,7 +6,9 @@ This repo keeps one supported implementation:
 
 - server: `src/server.py`
 - seed SQL: `db/init/`
-- generic client template: `mcp.json`
+- generic MCP client template for non-VS Code clients: `mcp.json`
+- AnythingLLM MCP template: `anythingllm_mcp_servers.json`
+- VS Code workspace MCP config: `.vscode/mcp.json`
 - config guide: `CONFIG.md`
 
 The demo exposes three tools:
@@ -14,6 +16,14 @@ The demo exposes three tools:
 - `ping_database`
 - `list_tables`
 - `run_readonly_query`
+
+Important:
+
+- VS Code does not use the root `mcp.json` file.
+- AnythingLLM does not use the root `mcp.json` file either.
+- The root `anythingllm_mcp_servers.json` is a template to copy into AnythingLLM's `plugins/` storage directory.
+- The root `mcp.json` is only a generic template for other MCP clients that expect a top-level `mcpServers` object.
+- VS Code uses `.vscode/mcp.json`.
 
 ## Scope
 
@@ -38,6 +48,28 @@ The seed SQL creates a small IT/helpdesk dataset with:
 ## Quickstart
 
 1. Create a virtual environment and install dependencies.
+
+If you are using `uv`, sync the project dependencies from `pyproject.toml`:
+
+```bash
+uv sync
+```
+
+Then run the server with:
+
+```bash
+uv run src/server.py
+```
+
+or
+
+```
+uv run src/server.py --transport http --host 127.0.0.1 --port 8000 --path /mcp
+```
+
+If you are using plain `venv` + `pip`, keep the environment named `.venv` if you also want `uv` commands to pick it up automatically. A separate `venv/` directory will not be used by `uv run` unless you activate it first.
+
+Otherwise, the standard `venv` flow still works:
 
 ```bash
 python3.11 -m venv .venv
@@ -89,6 +121,12 @@ mariadb -h <host> -P <port> -u <user> -p <database> < db/init/002_data.sql
 
 ```bash
 python src/server.py
+```
+
+Or with `uv`:
+
+```bash
+uv run src/server.py
 ```
 
 If it appears idle, that is normal. In stdio mode it is waiting for an MCP client.

@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "mariadb-demo": {
+    "mariadb-demo-template": {
       "command": "python",
       "args": ["src/server.py"],
       "cwd": "."

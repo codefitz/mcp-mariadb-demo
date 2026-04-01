@@ -506,12 +506,12 @@ If you still see your local machine name, VS Code is still not using this worksp
 
 ## 10. Other MCP Clients
 
-The root [mcp.json](/Users/fitzmoskal/Code/GitHub/mcp-mariadb-demo/mcp.json) is the generic template for clients that expect a top-level `mcpServers` object:
+The root [mcp.json](/Users/fitzmoskal/Code/GitHub/mcp-mariadb-demo/mcp.json) is only a generic template for non-VS Code MCP clients that expect a top-level `mcpServers` object. It is not the file VS Code reads.
 
 ```json
 {
   "mcpServers": {
-    "mariadb-demo": {
+    "mariadb-demo-template": {
       "command": "python",
       "args": ["src/server.py"],
       "cwd": "."
@@ -519,6 +519,8 @@ The root [mcp.json](/Users/fitzmoskal/Code/GitHub/mcp-mariadb-demo/mcp.json) is 
   }
 }
 ```
+
+The `mariadb-demo-template` name is deliberate so it is obvious this file is a starting point to copy or adapt, not the active VS Code workspace config.
 
 For clients that support this format, the important parts are:
 
@@ -528,7 +530,22 @@ For clients that support this format, the important parts are:
 
 If your client requires an absolute working directory, replace `.` with your repo path.
 
-## 11. Troubleshooting Checklist
+## 11. AnythingLLM
+
+AnythingLLM does not read the root [mcp.json](/Volumes/Hub/Code/GitHub/mcp-mariadb-demo/mcp.json). It expects a separate file named `anythingllm_mcp_servers.json`.
+
+This repo includes a template at [anythingllm_mcp_servers.json](/Volumes/Hub/Code/GitHub/mcp-mariadb-demo/anythingllm_mcp_servers.json).
+
+Copy that file into your AnythingLLM plugins storage directory as:
+
+- macOS desktop: `~/Library/Application Support/anythingllm-desktop/storage/plugins/anythingllm_mcp_servers.json`
+- Linux desktop: `~/.config/anythingllm-desktop/storage/plugins/anythingllm_mcp_servers.json`
+- Windows desktop: `C:\Users\<usr>\AppData\Roaming\anythingllm-desktop\storage\plugins\anythingllm_mcp_servers.json`
+- Docker/self-hosted: `/app/server/storage/plugins/anythingllm_mcp_servers.json`
+
+The template uses absolute paths on this machine so AnythingLLM can launch the server without depending on its own working directory. It also passes `--env-file` explicitly so the repo root `.env` is used even when AnythingLLM starts the process from somewhere else.
+
+## 12. Troubleshooting Checklist
 
 Check these in order:
 

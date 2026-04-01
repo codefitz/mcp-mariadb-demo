@@ -1,0 +1,13 @@
+[project]
+name = "mcp-mariadb-demo"
+version = "0.1.0"
+description = "Minimal learning repo for a Python MCP server backed by MariaDB."
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.6.0",
+    "PyMySQL>=1.1.1",
+    "python-dotenv>=1.0.1",
+]
+
+[tool.uv]
+package = false
