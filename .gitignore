@@ -19,3 +19,4 @@ venv/
 # Local scratch clone kept for reference, not part of the demo
 mariadb-mcp/
 uv.lock
+db/ucontrol/ucontrol.sql
