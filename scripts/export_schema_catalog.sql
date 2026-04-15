@@ -1,0 +1,63 @@
+-- Export broad schema metadata for all ASSET, UMAP, and relationship-oriented tables.
+-- Run this against the uControl database and convert the result to JSON if needed.
+
+SELECT
+    c.TABLE_SCHEMA,
+    c.TABLE_NAME,
+    c.COLUMN_NAME,
+    c.ORDINAL_POSITION,
+    c.DATA_TYPE,
+    c.COLUMN_TYPE,
+    c.IS_NULLABLE,
+    c.COLUMN_KEY,
+    c.EXTRA,
+    c.COLUMN_DEFAULT
+FROM INFORMATION_SCHEMA.COLUMNS c
+WHERE c.TABLE_SCHEMA = DATABASE()
+  AND (
+      c.TABLE_NAME LIKE 'ASSET\_%'
+      OR c.TABLE_NAME LIKE 'UMAP\_%'
+      OR c.TABLE_NAME LIKE '%\_RELATIONSHIP'
+      OR c.TABLE_NAME LIKE '%\_MAP'
+      OR c.TABLE_NAME LIKE '%\_MEMBER'
+  )
+ORDER BY c.TABLE_NAME, c.ORDINAL_POSITION;
+
+-- Foreign-key metadata where present.
+SELECT
+    kcu.TABLE_SCHEMA,
+    kcu.TABLE_NAME,
+    kcu.COLUMN_NAME,
+    kcu.REFERENCED_TABLE_NAME,
+    kcu.REFERENCED_COLUMN_NAME,
+    kcu.CONSTRAINT_NAME
+FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
+WHERE kcu.TABLE_SCHEMA = DATABASE()
+  AND kcu.REFERENCED_TABLE_NAME IS NOT NULL
+  AND (
+      kcu.TABLE_NAME LIKE 'ASSET\_%'
+      OR kcu.TABLE_NAME LIKE 'UMAP\_%'
+      OR kcu.TABLE_NAME LIKE '%\_RELATIONSHIP'
+      OR kcu.TABLE_NAME LIKE '%\_MAP'
+      OR kcu.TABLE_NAME LIKE '%\_MEMBER'
+  )
+ORDER BY kcu.TABLE_NAME, kcu.COLUMN_NAME;
+
+-- Index metadata.
+SELECT
+    s.TABLE_SCHEMA,
+    s.TABLE_NAME,
+    s.INDEX_NAME,
+    s.NON_UNIQUE,
+    s.SEQ_IN_INDEX,
+    s.COLUMN_NAME
+FROM INFORMATION_SCHEMA.STATISTICS s
+WHERE s.TABLE_SCHEMA = DATABASE()
+  AND (
+      s.TABLE_NAME LIKE 'ASSET\_%'
+      OR s.TABLE_NAME LIKE 'UMAP\_%'
+      OR s.TABLE_NAME LIKE '%\_RELATIONSHIP'
+      OR s.TABLE_NAME LIKE '%\_MAP'
+      OR s.TABLE_NAME LIKE '%\_MEMBER'
+  )
+ORDER BY s.TABLE_NAME, s.INDEX_NAME, s.SEQ_IN_INDEX;
